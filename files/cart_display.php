@@ -8,6 +8,7 @@
 	<link rel="stylesheet" type="text/css" href="../css/smoothness/jquery-ui.css">
 </head>
 <body>
+    <?php require_once "class.MySQL.php"; ?>
 	<div class="container-fluid">
 		<div class="row" role="header">
 			<?php include_once "header.php";?>
@@ -15,7 +16,7 @@
 
 		<div class="container"><!-- you can delete this div if you don't want the side bar-->
 				<!--Navigation sidebar-->
-				<div class="col-sm-3 col-md-2 sidebar">
+				<div class="col-sm-2 col-md-2 sidebar">
 	                <ul class="nav nav-sidebar">
 		                <li class="active"><a href="#">Search</a></li>
 		                <li><a href="#">Profile</a></li>
@@ -24,16 +25,74 @@
 	                </ul>
                 </div>
 				<!--Main Content area-->
-		        <div class="container-fluid col-sm-9 col-md-10">
-		            <h2>Your Shopping Cart</h2>
+				<div class ="container-fluid col-sm-10 col-lg-10">
+				    <h2>Your Shopping Cart</h2>
+                    <div class="container-fluid col-sm-8 col-lg-7">
+
+                        <?php
+                        $omysql=new MySQL();
+                        $usernm = "ayantika";
+                        $where=array("user_nm like"=>$usernm);
+                        $from = "cart";
+                        $omysql->Select($from, $where);
+                        $rows = $omysql->records;
+                        $res1 = $omysql->arrayedResult;
+                        ?>
 		            <table class="table table striped">
                         <tbody>
-                            <tr>
-                                <td>kjhiiulhllllllllllllllllllllllllllllllllllllllllllllllllli</td>
-                            </tr>
-                            <tr>
-                                <td>khojjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjji</td>
-                            </tr>
+                            <?php
+                            $i = 0;
+                            $total=0;
+                            $tax = 0;
+                            $grandtot = 0;
+                            $from = "items";
+                                while($i<$rows)
+                                {
+                                    $item_id = $res1[$i]["item_id"];
+                                    $where = array("item_id like"=>$item_id);
+                                    $omysql->Select($from, $where);
+                                    $res2 = $omysql->arrayedResult;
+                                    $total = $res1[$i]["qty"]*$res2[0]["promotion_amnt"];
+                                    $grandtot+=$total;
+                                    $tax = (($res2[0]["tax"]/100)*$total);
+                                    if($omysql->records > 0)
+                                    {
+                                        echo "<tr>
+                                        <td>
+                                        <img src=".'"'.$res2[0]["pic_loc"].'"'." width=".'"120"'."height=".'"120"'.">
+                                        </td>
+                                        <td>
+                                        <h4><a href=".'"#"'." >".$res2[0]["item_nm"]."</a></h4>"
+                                        ."\n"."<small>Item price: ₹".$res2[0]["promotion_amnt"]
+                                        ."<br>"."Condition: ".$res2[0]["item_condition"]."
+                                        </small></td>
+                                        <td>
+                                        <label>Quantity: </label>
+                                        <input type=".'"text"'."value=".'"'.$res1[$i]["qty"].'"'. "maxlength=".'"2"'."style=".'"width: 30px;"'.'/'.">
+                                        "."<br><br><small>Instant Delivery: ";
+                                        if(trim($res2[0]["delivery_type"])=='instant')
+                                        {
+                                            echo "Available";
+                                        }
+                                        elseif(trim($res2[0]["delivery_type"])=='normal')
+                                        {
+                                            echo "Not Available";
+                                        }
+                                        echo "</small>
+                                        </td>
+                                        <td> &nbsp;&nbsp;₹".$total."<br><small>+₹".$tax."</small></td>
+                                        </tr>";
+                                    }
+                                    $i++;
+                                }
+                                if($rows==0)
+                                {
+                                    echo "<font style=".'"Comic Sans MS"'."color=".'"AF36ED"'."><b><h4>Your shopping cart is empty, but it doesn't have to be.</h4></b><br>
+                                        There are lots of great deals awaiting you to bid or buy.<br>
+                                        Start Shopping, click the ".'"Add to Cart"'." button for any item you wish to buy.<br></font>";
+                                }
+                                //<img src =".'"www.soccerkraze.com/images/Adidas%20Estadio%20Team%20Backpack.JPG"'. 'alt=""'.">
+                             ?>
                         </tbody>
                     </table>
                     <h2>Saved Items List</h2>
@@ -44,6 +103,29 @@
 						It will appear in the content
 						section of webpage
 		           -->
+                </div>
+                <!--Cart Status container -->
+				<div class="col-sm-2 col-lg-3 sidebar">
+				    <div class="well">
+	               <?php
+	               echo "<b>"."Cart Summary "."</b> (".$rows;
+                    if($rows==1)
+                    {
+                        echo "Item)";
+                    }
+                    else
+                    {
+                        echo "Items)";
+                    }
+                    echo "\n";
+                    if($rows>0)
+                    {
+                        echo "<b>"."Total: ".$grandtot."</b>"."\n";
+                    }
+
+	               ?>
+                </div>
+                </div>
 
 	    		</div>
 		</div>
