@@ -25,13 +25,13 @@
 	                </ul>
                 </div>
 				<!--Main Content area-->
-				<div class ="container-fluid col-sm-10 col-lg-10">
+				<div class ="container-fluid col-sm-8 col-lg-7.5">
 				    <h2>Your Shopping Cart</h2>
-                    <div class="container-fluid col-sm-8 col-lg-7">
+                  <!--  <div class="container col-sm-8 col-lg-7"> -->
 
                         <?php
                         $omysql=new MySQL();
-                        $usernm = "ayantika";
+                        $usernm = "ayantik";
                         $where=array("user_nm like"=>$usernm);
                         $from = "cart";
                         $omysql->Select($from, $where);
@@ -46,15 +46,17 @@
                             $tax = 0;
                             $grandtot = 0;
                             $from = "items";
+                            if($rows>0){
                                 while($i<$rows)
                                 {
                                     $item_id = $res1[$i]["item_id"];
                                     $where = array("item_id like"=>$item_id);
                                     $omysql->Select($from, $where);
                                     $res2 = $omysql->arrayedResult;
-                                    $total = $res1[$i]["qty"]*$res2[0]["promotion_amnt"];
+                                    $total = $res1[$i]["qty"]*$res2[0]["cost"];
                                     $grandtot+=$total;
                                     $tax = (($res2[0]["tax"]/100)*$total);
+                                    $grandtot+=$tax;
                                     if($omysql->records > 0)
                                     {
                                         echo "<tr>
@@ -63,11 +65,11 @@
                                         </td>
                                         <td>
                                         <h4><a href=".'"#"'." >".$res2[0]["item_nm"]."</a></h4>"
-                                        ."\n"."<small>Item price: ₹".$res2[0]["promotion_amnt"]
+                                        ."\n"."<small>Item price: ₹".$res2[0]["cost"]
                                         ."<br>"."Condition: ".$res2[0]["item_condition"]."
                                         </small></td>
                                         <td>
-                                        <label>Quantity: </label>
+                                        Quantity:
                                         <input type=".'"text"'."value=".'"'.$res1[$i]["qty"].'"'. "maxlength=".'"2"'."style=".'"width: 30px;"'.'/'.">
                                         "."<br><br><small>Instant Delivery: ";
                                         if(trim($res2[0]["delivery_type"])=='instant')
@@ -82,9 +84,24 @@
                                         </td>
                                         <td> &nbsp;&nbsp;₹".$total."<br><small>+₹".$tax."</small></td>
                                         </tr>";
+                                        echo "<tr><td></td><td></td><td></td>
+                                            <td>
+                                            <font size=".'"2"'." align=".'"right"'.">
+                                            <a href=".'"#"'."><u>Remove</u></a>
+                                            &nbsp;|&nbsp;
+                                            <a href=".'"#"'."><u>Save for Later</u></a>
+                                            </font></td>
+                                            </tr>
+                                            ";
                                     }
                                     $i++;
                                 }
+                                echo"<tr><td></td><td></td><td></td>
+                                <td><font style=".'"Comic Sans MS"'." size=".'"4"'." align=".'"right"'.">
+                                Total: ₹".$grandtot."
+                                </font></td></tr>
+                                ";
+                            }
                                 if($rows==0)
                                 {
                                     echo "<font style=".'"Comic Sans MS"'."color=".'"AF36ED"'."><b><h4>Your shopping cart is empty, but it doesn't have to be.</h4></b><br>
@@ -95,7 +112,84 @@
                              ?>
                         </tbody>
                     </table>
-                    <h2>Saved Items List</h2>
+                    <hr size=10></hr>
+                    <div class = "fr ralign" align="right">
+                    <button class="btn" type="submit" href="#"><b>Continue Shopping</b></button>
+                    <?php echo"&nbsp;" ?>
+                    <button class="btn btn-primary" href="#"><i class="glyphicon glyphicon-shopping-cart glyphicon-white"></i><b> Proceed to Checkout</b></button>
+                    </div>
+                    <br><br><br>
+                    <h2>Your Saved Items</h2>
+                    <table class="table table striped">
+                        <tbody>
+                            <?php
+                            $where=array("user_nm like"=>$usernm);
+                            $from = "saved_list";
+                            $omysql->Select($from, $where);
+                            $rows = $omysql->records;
+                            $res1 = $omysql->arrayedResult;
+                            $i = 0;
+                            $total=0;
+                            $tax = 0;
+                            $from = "items";
+                            if($rows>0){
+                                while($i<$rows)
+                                {
+                                    $item_id = $res1[$i]["item_id"];
+                                    $where = array("item_id like"=>$item_id);
+                                    $omysql->Select($from, $where);
+                                    $res2 = $omysql->arrayedResult;
+                                    $total = $res1[$i]["qty"]*$res2[0]["cost"];
+                                    $tax = (($res2[0]["tax"]/100)*$total);
+                                    if($omysql->records > 0)
+                                    {
+                                        echo "<tr>
+                                        <td>
+                                        <img src=".'"'.$res2[0]["pic_loc"].'"'." width=".'"120"'."height=".'"120"'.">
+                                        </td>
+                                        <td>
+                                        <h4><a href=".'"#"'." >".$res2[0]["item_nm"]."</a></h4>"
+                                        ."\n"."<small>Item price: ₹".$res2[0]["cost"]
+                                        ."<br>"."Condition: ".$res2[0]["item_condition"]."
+                                        </small></td>
+                                        <td>
+                                        Quantity:
+                                        <input type=".'"text"'."value=".'"'.$res1[$i]["qty"].'"'. "maxlength=".'"2"'."style=".'"width: 30px;"'.'/'.">
+                                        "."<br><br><small>Instant Delivery: ";
+                                        if(trim($res2[0]["delivery_type"])=='instant')
+                                        {
+                                            echo "Available";
+                                        }
+                                        elseif(trim($res2[0]["delivery_type"])=='normal')
+                                        {
+                                            echo "Not Available";
+                                        }
+                                        echo "</small>
+                                        </td>
+                                        <td> &nbsp;&nbsp;₹".$total."<br><small>+₹".$tax."</small></td>
+                                        </tr>";
+                                        echo "<tr><td></td><td></td><td></td>
+                                            <td>
+                                            <font size=".'"2"'." align=".'"right"'.">
+                                            <a href=".'"#"'."><u>Remove</u></a>
+                                            &nbsp;|&nbsp;
+                                            <a href=".'"#"'."><u>Save for Later</u></a>
+                                            </font></td>
+                                            </tr>
+                                            ";
+                                    }
+                                    $i++;
+                                }
+                            }
+                                if($rows==0)
+                                {
+                                    echo "<font style=".'"Comic Sans MS"'."><b><h4>Want to save items in your cart to buy later?</h4></b><br>
+                                        Then just click the ".'"Save for Later"'.".Remember, saved items aren't reserved for you, so don't wait too long to buy them.<br></font>";
+                                }
+                                //<img src =".'"www.soccerkraze.com/images/Adidas%20Estadio%20Team%20Backpack.JPG"'. 'alt=""'.">
+                             ?>
+                        </tbody>
+                    </table>
 		           <!--
 						Write all
 						your code
@@ -103,12 +197,15 @@
 						It will appear in the content
 						section of webpage
 		           -->
-                </div>
+              <!--  </div>  -->
                 <!--Cart Status container -->
-				<div class="col-sm-2 col-lg-3 sidebar">
+
+
+	    		</div>
+	    		<div class="col-sm-2 col-lg-2.5 sidebar">
 				    <div class="well">
 	               <?php
-	               echo "<b>"."Cart Summary "."</b> (".$rows;
+	               echo "<b>"."Cart Summary "."</b> (".$rows."&nbsp;";
                     if($rows==1)
                     {
                         echo "Item)";
@@ -117,17 +214,15 @@
                     {
                         echo "Items)";
                     }
-                    echo "\n";
+                    echo "<br>";
                     if($rows>0)
                     {
-                        echo "<b>"."Total: ".$grandtot."</b>"."\n";
+                        echo "<b>"."Total: ₹".$grandtot."</b>"."<br>";
                     }
 
 	               ?>
                 </div>
                 </div>
-
-	    		</div>
 		</div>
 	</div>
 	<!--All javascript placed at the end so that the page loads faster-->
